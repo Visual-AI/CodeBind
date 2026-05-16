@@ -1,0 +1,57 @@
+# # # # #
+# Config file for training the model on AudioSet dataset.
+#
+# # # # #
+
+expname: flir_exp
+
+# log
+#loggers: wandb
+
+# data
+datasets: flir
+scale_factor: 10                 # replicate the dataset x scale_factor
+batch_size: 10                  # on each GPU
+max_epochs: 40
+num_workers: 12                   # Number of workers for data loading
+
+# train
+train: True
+train_mode: lora
+modality_train: [thermal, vision, text]
+modality_pair: [thermal, vision, text]    # modality to aline
+modality_eval: thermal             # Modality to eval, choices=["vision", "text", "audio", "thermal", "depth", "imu"]
+modality_reconstruction: [vision, thermal]
+
+# params
+lr: 5e-5
+lr_new: 5e-4
+weight_decay: 1e-4
+momentum_betas: [0.9, 0.95]
+gradient_clip_val: 1.0
+temperature: 0.1                 # Temperature parameter for InfoNCE loss
+self_contrast: False
+intra_anchor_align: True # enable text and vision alignment when three modalities are aligned
+# inter_anchor_align: vision # set vision as anchor modality (by default it is [vision, text])
+
+# loss
+val_loss: False  # whether to calculate validation loss
+loss_vq_weight: 1000.0
+loss_vq_reg_weight: 0.05
+loss_cmcm_weight: 1.0
+loss_modal_decomp_weight: 1.0
+loss_uniform_weight: 1.0
+
+# if only use vision for alignment: proper weights 50/0.5/0.5/1
+
+# -------------------- Common settings -------------------
+seed: 43                          # Random seed for reproducibility
+
+# lora
+lora_rank: 4                      # Rank of LoRA layers
+lora_modality_names: [thermal]          # Modality names to apply LoRA
+lora_layer_idxs_thermal: [6, 7, 8, 9, 10, 11]
+lora_module_mode: all  # all, attn_out, attn
+
+# Directory containing the datasets
+flir_root: ./.datasets/FLIR_v2

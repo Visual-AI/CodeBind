@@ -1,0 +1,56 @@
+# # # # #
+# Config file for training the model on MSRVTT dataset.
+#
+# # # # #
+
+expname: msrvtt_exp
+
+# log
+# loggers: wandb  # 通过sh 设置， 不设置则不使用log
+
+# data
+datasets: 
+  - msrvtt
+scale_factor: 1                  # replicate the dataset x scale_factor
+batch_size: 40                   # on each GPU  actual batch size = batch_size * clips_per_video(15)
+max_epochs: 20
+num_workers: 8                   # Number of workers for data loading
+
+# train
+train: False
+train_mode: lora
+modality_train: [vision, text]
+modality_pair: [vision, text]    # modality to aline
+modality_eval: vision            # Modality to eval, choices=["vision", "text", "audio", "thermal", "depth", "imu"]
+modality_reconstruction: [vision]
+
+# params
+lr: 1e-5
+lr_new: 5e-4
+weight_decay: 1e-4
+momentum_betas: [0.9, 0.95]
+gradient_clip_val: 1.0
+temperature: 0.07                 # Temperature parameter for InfoNCE loss
+self_contrast: False
+
+# loss
+val_loss: False  # whether to calculate validation loss
+loss_vq_weight: 10.0
+loss_vq_reg_weight: 0.01
+loss_cmcm_weight: 0.05
+loss_modal_decomp_weight: 0.1
+loss_uniform_weight: 1.0
+
+# -------------------- Common settings -------------------
+seed: 43                          # Random seed for reproducibility
+
+# lora
+lora_rank: 4                      # Rank of LoRA layers
+lora_modality_names: [vision]          # Modality names to apply LoRA
+lora_layer_idxs_vision: [26, 27, 28, 29, 30, 31]
+lora_module_mode: all  # all, attn_out, attn
+
+# Directory containing the datasets
+# create symbolic link: ln -s [src] ./.datasets/RGBD-SUN
+msrvtt_root: ./.datasets/MSRVTT
+

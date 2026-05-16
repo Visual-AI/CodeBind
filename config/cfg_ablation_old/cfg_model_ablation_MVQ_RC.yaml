@@ -1,0 +1,137 @@
+# 使用single codebook, 不区分common和specific, 且使用decoder
+
+encoder:
+  # ---  dim of trunk feature vector ---
+  trunk_embed_dim:
+    vision: 1280
+    text:    768
+    audio:   768
+    depth:   384
+    thermal: 768
+    imu:     512
+    tactile: 768
+    eeg:     768
+
+  # ---  dim of alined/common feature vector ---
+  output_embed_dim:
+    common:  1024      # Fixed  
+    vision:  0  
+    text:    0
+    audio:   0
+    depth:   0
+    thermal: 0
+    imu:     0
+    tactile: 0
+    eeg:     0
+    
+
+  # head
+  add_new_output_head: False  # output_embed_dim中任意specific dim，则需add_new_output_head
+  use_both_head: False
+
+  # postprocessor
+  use_postprocessors_outencoder: True
+  learnable_postprocessors: True
+
+decoder:
+  use_decoder: True
+  with_cls_token: True  # the decoder takes both 'cls_token' and 'patch_tokens' as inputs.
+  input_projection: True # align the encoder trunk output dim with decoder input dim and add encoder trunk output into reconstruction 
+
+  # input_embed_dim:  # 可以根据 encoder.output_embed_dim 推算出来
+  #   vision:  1280  # 1024 + 256  # encoder.output_embed_dim.common + encoder.output_embed_dim.vision
+  #   image:   1280  # 1024 + 256
+  #   video:   1280  # 1024 + 256
+  #   audio:   1280  # 1024+ 256
+  #   depth:   1280  # 1024+ 256
+  #   thermal: 1280  # 1024+ 256
+  #   imu:     1280  # 1024+ 256
+  
+  # decoder_trunk
+  trunk_embed_dim:
+    vision:  512
+    audio:   512
+    depth:   512
+    thermal: 512
+    imu:     512
+    tactile: 512
+    eeg:     512
+
+  # num of stacked attention blocks in the transformer trunk
+  decoder_depth: 8        # , default 8
+  
+  # decoder_head
+  hidden_channels:
+    vision:  128
+    audio:   128
+    depth:   128
+    thermal: 128
+    imu:     128
+    tactile: 128
+    eeg:     128
+
+
+vector_quantise:
+  use_mvq: True 
+  single_vq_embed_num: 1024
+  single_vq_embed_dim: 8
+  vq_all_token: True  # True，对encoder输出的cls_token 和 patch_tokens 都进行VQ；False, 则 仅对cls_token 进行VQ
+  # ------
+  distance: 'cos'
+  anchor: 'random'
+  ema_update: True  # use ema instead of codebook loss to update codebook
+  shuffle_scale: 0
+  # loss
+  sim_loss: False
+  contras_loss: True
+  uni_loss: True
+
+  # ------
+  share_codebook: False  # common & specific share a codebook
+  seperate_codebook: False # use only specific codebook 
+  norm_code: True
+  kmeans_init: True
+  # multi-modal codebook
+  # ------ mvq:
+  # --- seg_type: common & specific 的切分方式
+  # TODO use string instead of 'magic num' as seg_type flag
+  # 1. 先划分为 common : specific = n1 : n2，再分别对common和specific切分成数小段后进行VQ
+  # 优势：能够将common_codebook and specific_codebook 统一
+  # example
+  #      exp1 n1 = n2, 1024 & 1024, dim_codevector = 8
+  #      exp2 n1 > n2, 1024 &  256, dim_codevector = 8
+  #      exp3 n1 > n2, 1024 &  256, dim_codevector_common = 8, dim_codevector_specific = 4
+  seg_type: 1  # first, divide tensor into common and specific subvectors, then split each subvector into small chunks for VQ
+
+  # 2. 先切成m段, 每一段长度相同。再将每一段划分为common : specific = d1 : d2， 即dim根据embed_dim进行设定
+  # example
+  #      exp1 dim_codevector_common = 8, dim_codevector_specific = 8
+  #      exp1 dim_codevector_common = 8, dim_codevector_specific = 4
+  # seg_type: 2  # first, split tensor into equally sized chunks, then divide each chunk into common and specific subvectors
+
+  # 3. 切成m段, 每一段长度相同, common : specific = n : 1， dim 相同
+
+  # 
+  codevector_num: 
+    # num of codewords in the common coddebook 
+    common: 1024
+    # num of codewords in each specific coddebook
+    text: 256
+    vision: 256
+    depth: 256
+    audio: 256
+    thermal: 256  
+    imu: 256
+    tactile: 256
+    eeg: 256
+
+  codevector_dim: 
+    common: 8
+    text: 0
+    vision: 8
+    depth: 8
+    audio: 8
+    thermal: 8 
+    imu: 8
+    tactile: 8
+    eeg: 8

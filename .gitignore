@@ -1,0 +1,38 @@
+**__pycache__
+.vscode/
+.DS_Store/
+
+.checkpoints
+
+lightning_logs/
+
+.assets
+
+
+.datasets
+
+
+debug
+scripts/debug*
+*debug*.sh
+
+.log
+
+
+wandb
+
+
+exp
+
+
+# submodules
+submodules/GroundingDINO
+
+application
+# application/stable_unclip/
+# application/stable_unclip_new/
+# application/intra_retrieval/
+# application/embed_detection/
+
+.cache
+tmp

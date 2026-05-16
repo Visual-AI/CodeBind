@@ -1,0 +1,97 @@
+# # --- --- --- --- --- --- --- ---   1  --- --- --- --- --- --- --- ---
+# timestamp=$(date "+%Y%m%d_%H%M%S")
+# echo ${timestamp}
+
+# expname=flir_MVQ
+# expdir=exp_ablation
+
+# mkdir -p exp/${expdir}/${expname}
+
+# python main.py \
+# --expname ${expname} \
+# --batch_size 16 \
+# --max_epochs 30 \
+# --loggers wandb \
+# --val_loss True \
+# --cfg config/cfg_flir.yaml \
+# --cfg_model config/cfg_ablation/cfg_model_ablation_MVQ.yaml \
+# --checkpoint_dir exp/${expdir}/${expname}/checkpoints \
+# --log_img_dir exp/${expdir}/${expname}/log_img \
+# --lightning_log exp/${expdir}/${expname}/lightning_log \
+# --save_cfg_filepath exp/${expdir}/${expname}/cfg_all_train.yaml \
+# --loggers_dir exp/${expdir}/${expname}/log \
+# --device cuda:0 cuda:1 cuda:2 2>&1 | tee ./exp/${expdir}/${expname}/${timestamp}_train.log
+
+# # --- --- --- --- --- --- --- ---   2  --- --- --- --- --- --- --- ---
+timestamp=$(date "+%Y%m%d_%H%M%S")
+echo ${timestamp}
+
+expname=flir_MVQ_RC
+expdir=exp_ablation
+
+mkdir -p exp/${expdir}/${expname}
+
+python main.py \
+--expname ${expname} \
+--batch_size 8 \
+--max_epochs 30 \
+--loggers wandb \
+--val_loss True \
+--cfg config/cfg_flir.yaml \
+--cfg_model config/cfg_ablation/cfg_model_ablation_MVQ_RC.yaml \
+--checkpoint_dir exp/${expdir}/${expname}/checkpoints \
+--log_img_dir exp/${expdir}/${expname}/log_img \
+--lightning_log exp/${expdir}/${expname}/lightning_log \
+--save_cfg_filepath exp/${expdir}/${expname}/cfg_all_train.yaml \
+--loggers_dir exp/${expdir}/${expname}/log \
+--device cuda:0 cuda:1 cuda:2 cuda:3 2>&1 | tee ./exp/${expdir}/${expname}/${timestamp}_train.log
+
+# # --- --- --- --- --- --- --- ---   3  --- --- --- --- --- --- --- ---
+timestamp=$(date "+%Y%m%d_%H%M%S")
+echo ${timestamp}
+
+expname=flir_MVQ_seperate
+expdir=exp_ablation
+
+mkdir -p exp/${expdir}/${expname}
+
+python main.py \
+--expname ${expname} \
+--batch_size 8 \
+--max_epochs 30 \
+--loggers wandb \
+--val_loss True \
+--cfg config/cfg_flir.yaml \
+--cfg_model config/cfg_ablation/cfg_model_ablation_MVQ_seperate.yaml \
+--checkpoint_dir exp/${expdir}/${expname}/checkpoints \
+--log_img_dir exp/${expdir}/${expname}/log_img \
+--lightning_log exp/${expdir}/${expname}/lightning_log \
+--save_cfg_filepath exp/${expdir}/${expname}/cfg_all_train.yaml \
+--loggers_dir exp/${expdir}/${expname}/log \
+--device cuda:0 cuda:1 cuda:2 cuda:3 2>&1 | tee ./exp/${expdir}/${expname}/${timestamp}_train.log
+
+# # --- --- --- --- --- --- --- ---   4  --- --- --- --- --- --- --- ---
+timestamp=$(date "+%Y%m%d_%H%M%S")
+echo ${timestamp}
+
+expname=flir_MVQ_typical
+expdir=exp_ablation
+
+mkdir -p exp/${expdir}/${expname}
+
+python main.py \
+--expname ${expname} \
+--batch_size 8 \
+--max_epochs 30 \
+--loggers wandb \
+--val_loss True \
+--cfg config/cfg_flir.yaml \
+--cfg_model config/cfg_ablation/cfg_model_ablation_MVQ_typical.yaml \
+--checkpoint_dir exp/${expdir}/${expname}/checkpoints \
+--log_img_dir exp/${expdir}/${expname}/log_img \
+--lightning_log exp/${expdir}/${expname}/lightning_log \
+--save_cfg_filepath exp/${expdir}/${expname}/cfg_all_train.yaml \
+--loggers_dir exp/${expdir}/${expname}/log \
+--device cuda:0 cuda:1 cuda:2 cuda:3 2>&1 | tee ./exp/${expdir}/${expname}/${timestamp}_train.log
+
+

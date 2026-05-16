@@ -1,0 +1,46 @@
+# # # # #
+# Config file for training the model on SUN-RGBD dataset.
+#
+# # # # #
+expname: exp_tag
+
+# data
+datasets: tag
+scale_factor: 1                  # replicate the dataset x scale_factor
+batch_size: 10                   # on each GPU
+max_epochs: 40
+num_workers: 8                   # Number of workers for data loading
+text_template: imagenet           # simple, imagenet or scene
+
+# train
+train: True
+train_mode: fulltune
+modality_train: [tactile, vision, text]
+modality_pair: [tactile, vision, text]    # modality to aline
+modality_eval: tactile              # Modality to eval, choices=["vision", "text", "audio", "thermal", "depth", "imu"], 'vision', 'tactile', 'text'
+modality_reconstruction: [vision, tactile]
+
+# params
+lr: 5e-4
+lr_new: 5e-4
+weight_decay: 1e-4
+momentum_betas: [0.9, 0.95]
+gradient_clip_val: 1.0
+temperature: 0.07                 # Temperature parameter for InfoNCE loss
+self_contrast: False
+intra_anchor_align: True # enable text and vision alignment when three modalities are aligned
+
+# loss
+val_loss: True  # whether to calculate validation loss
+loss_vq_weight: 1000.0
+loss_vq_reg_weight: 0.01
+loss_cmcm_weight: 0.1
+loss_modal_decomp_weight: 0.1
+loss_uniform_weight: 1.0
+
+# -------------------- Common settings -------------------
+seed: 43                          # Random seed for reproducibility
+
+# Directory containing the datasets
+tag_root: ./.datasets/tag
+
