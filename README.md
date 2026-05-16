@@ -86,8 +86,8 @@ Please refer to [Doc/TRAINING.md](Doc/TRAINING.md) for details on CodeBind train
 This repository builds upon the invaluable contributions of the open-source community. We extend our sincere appreciation to the following projects for their foundational work:
 
 - [ImageBind](https://github.com/facebookresearch/imagebind)
-  * [ViT-Lens](https://github.com/TencentARC/ViT-Lens)
-  * [ImageBind LoRA Implementation](https://github.com/fabawi/ImageBind-LoRA)
+- [ViT-Lens](https://github.com/TencentARC/ViT-Lens)
+- [ImageBind LoRA Implementation](https://github.com/fabawi/ImageBind-LoRA)
 
 
 
