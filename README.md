@@ -18,6 +18,9 @@
     <a href="https://visual-ai.github.io/codebind/" target="_blank">
     <img src="https://img.shields.io/badge/Project Page-F78100?style=plastic&logo=google-chrome&logoColor=white" alt="Project Page">
     </a>
+    <a href="https://huggingface.co/zykev/CodeBind" target="_blank">
+    <img src="https://img.shields.io/badge/Hugging Face-FFD21E?style=plastic&logo=huggingface&logoColor=black" alt="Hugging Face">
+    </a>
 </p>
 
 <div align="center">
@@ -86,8 +89,8 @@ Please refer to [Doc/TRAINING.md](Doc/TRAINING.md) for details on CodeBind train
 This repository builds upon the invaluable contributions of the open-source community. We extend our sincere appreciation to the following projects for their foundational work:
 
 - [ImageBind](https://github.com/facebookresearch/imagebind)
-  * [ViT-Lens](https://github.com/TencentARC/ViT-Lens)
-  * [ImageBind LoRA Implementation](https://github.com/fabawi/ImageBind-LoRA)
+- [ViT-Lens](https://github.com/TencentARC/ViT-Lens)
+- [ImageBind LoRA Implementation](https://github.com/fabawi/ImageBind-LoRA)
 
 
 
