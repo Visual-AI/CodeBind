@@ -5,6 +5,9 @@
         <a href="https://github.com/zykev">Zeyu Chen</a><sup>*</sup>&nbsp;&nbsp;
         <a href="https://scholar.google.com/citations?user=KfXHhQYAAAAJ&hl=zh-CN">Jie Li</a><sup>*</sup>&nbsp;&nbsp;
         <a href="https://www.kaihan.org/">Kai Han</a><sup>†</sup>
+        <a href="https://github.com/zykev">Zeyu Chen</a>&nbsp;&nbsp;
+        <a href="https://github.com/waterljwant">Jie Li</a>&nbsp;&nbsp;
+        <a href="https://www.kaihan.org/">Kai Han</a>
     </p>
     <p>
         Visual AI Lab, The University of Hong Kong
