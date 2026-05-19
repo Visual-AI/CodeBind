@@ -13,10 +13,10 @@ All downloaded checkpoints should be placed under (or connected via symoblic lin
 
 ## Available Checkpoints
 
-| Model | Backbone | Modalities | Download | Notes |
-| --- | --- | --- | --- | --- |
-| CodeBind-IB | ImageBind | Vision, Audio, Depth, Thermal | [Hugging Face](https://huggingface.co/zykev/CodeBind) | CodeBind checkpoint trained from ImageBind features. |
-| ImageBind-Huge | ImageBind | Vision, Text, Audio, Depth, IMU, Thermal | [Meta download](https://dl.fbaipublicfiles.com/imagebind/imagebind_huge.pth) | Required ImageBind base checkpoint. |
+| Model | Backbone  | Download | Notes |
+| --- | --- | --- | --- |
+| CodeBind-IB | ImageBind | [Hugging Face](https://huggingface.co/zykev/CodeBind) | CodeBind checkpoint trained from ImageBind features. |
+| ImageBind-Huge | ImageBind | [Meta download](https://dl.fbaipublicfiles.com/imagebind/imagebind_huge.pth) | Required ImageBind base checkpoint. |
 
 ## Download From Hugging Face
 
@@ -37,7 +37,7 @@ huggingface-cli download zykev/CodeBind --local-dir ~/.checkpoints/
 After downloading, make sure the checkpoint folders are available under `~/.checkpoints/`. For example:
 
 ```bash
-ls ~/.checkpoints/exp_asa
+ls ~/.checkpoints/asa_lora_MVQ1024x8_256x8
 ```
 
 ## Download ImageBind Base Checkpoint

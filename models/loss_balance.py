@@ -105,16 +105,11 @@ class LossBalancer:
                 
 
     def _update_weights_ema(self, raw_losses):
-        # 先更新基准
         base_val = raw_losses[self.base_loss_name].detach().item()
         self.running_stats[self.base_loss_name] = (self.momentum * self.running_stats[self.base_loss_name] + 
                                                    (1 - self.momentum) * base_val)
         base_magnitude = self.running_stats[self.base_loss_name]
         
-        # 准备打印字符串
-        # print_msg = f"\n>>> [Step {self.global_step}] Loss Weights Updated (Interval: {self.current_interval}) <<<"
-        # print_msg += f"\n    Base ({self.base_loss_name}) Magnitude: {base_magnitude:.6f}, Weight: 1.0000"
-
         for name in self.loss_names:
             if name == self.base_loss_name or name not in raw_losses: continue
             
@@ -124,7 +119,3 @@ class LossBalancer:
             
             self.current_weights[name] = self._calculate_custom_weight(name, base_magnitude, self.running_stats[name])
 
-                # 添加到打印信息
-                # print_msg += f"\n    - {name:18s} | Mag: {self.running_stats[name]:.6f} | Weight: {new_weight:.6f}"
-
-        # print(print_msg + "\n" + "="*60)

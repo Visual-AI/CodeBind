@@ -2,26 +2,30 @@
 
 <div align="center">
     <p>
-        <a href="https://github.com/zykev">Zeyu Chen</a>&nbsp;&nbsp;
-        <a href="https://scholar.google.com/citations?user=KfXHhQYAAAAJ&hl=zh-CN">Jie Li</a>&nbsp;&nbsp;
-        <a href="https://www.kaihan.org/">Kai Han</a>
+        <a href="https://github.com/zykev">Zeyu Chen</a><sup>*</sup>&nbsp;&nbsp;
+        <a href="https://scholar.google.com/citations?user=KfXHhQYAAAAJ&hl=zh-CN">Jie Li</a><sup>*</sup>&nbsp;&nbsp;
+        <a href="https://www.kaihan.org/">Kai Han</a><sup>†</sup>
     </p>
     <p>
         Visual AI Lab, The University of Hong Kong
     </p>
+    <p>
+        <sup>*</sup>Equal contribution&nbsp;&nbsp;<sup>†</sup>Corresponding author
+    </p>
 </div>
 
-<p align="center">
-    <a href="https://arxiv.org/abs/XXXX.XXXXX" target="_blank">
-    <img src="https://img.shields.io/badge/Paper-00AEEF?style=plastic&logo=arxiv&logoColor=white" alt="Paper">
-    </a>
-    <a href="https://visual-ai.github.io/codebind/" target="_blank">
-    <img src="https://img.shields.io/badge/Project Page-F78100?style=plastic&logo=google-chrome&logoColor=white" alt="Project Page">
+
+<div align="center" style="margin-bottom:2em;">
+    <a href="https://arxiv.org/abs/2605.18257" target="_blank">
+        <img src="https://img.shields.io/badge/CodeBind-ArXiv-red" alt="Paper arXiv">
     </a>
     <a href="https://huggingface.co/zykev/CodeBind" target="_blank">
-    <img src="https://img.shields.io/badge/Hugging Face-FFD21E?style=plastic&logo=huggingface&logoColor=black" alt="Hugging Face">
+        <img src="https://img.shields.io/badge/CodeBind-Model-blue" alt="3DRS Model">
     </a>
-</p>
+    <a href="https://visual-ai.github.io/codebind/" target="_blank">
+        <img src="https://img.shields.io/badge/CodeBind-Webpage-green" alt="3DRS Webpage">
+    </a>
+</div>
 
 <div align="center">
     <a href="https://visual-ai.github.io/codebind/">
@@ -35,7 +39,8 @@
 </div>
 
 ## 📣 Updates
-- **[April 16, 2026]** Initial Release
+- **[May 18, 2026]** Paper Release via ArXiv
+- **[May 16, 2026]** Code Initial Release
 
 ## ✨ Overview
 Multimodal representation alignment is crucial for large language models and robotics. Traditional methods often struggle with cross-modal information discrepancies and data scarcity, resulting in suboptimal alignment spaces that neglect modality-unique features.

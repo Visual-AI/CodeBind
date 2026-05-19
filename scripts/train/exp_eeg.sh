@@ -14,6 +14,7 @@ python main.py \
 --batch_size 6 \
 --max_epochs 30 \
 --loggers wandb \
+--wandb_entity codebind \
 --val_loss True \
 --checkpoint_dir exp/${expdir}/${expname}/checkpoints \
 --log_img_dir exp/${expdir}/${expname}/log_img \

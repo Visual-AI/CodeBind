@@ -14,6 +14,7 @@ python main_lossbalance.py \
 --batch_size 8 \
 --max_epochs 30 \
 --loggers wandb \
+--wandb_entity codebind \
 --val_loss True \
 --loss_vq_weight True \
 --loss_vq_reg_weight True \

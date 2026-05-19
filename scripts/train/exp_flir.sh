@@ -15,6 +15,7 @@ python main.py \
 --batch_size 8 \
 --max_epochs 30 \
 --loggers wandb \
+--wandb_entity codebind \
 --val_loss True \
 --cfg config/cfg_flir.yaml \
 --cfg_model config/cfg_model.yaml \

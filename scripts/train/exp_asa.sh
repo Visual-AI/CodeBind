@@ -15,6 +15,7 @@ python main.py \
 --batch_size 6 \
 --max_epochs 40 \
 --loggers wandb \
+--wandb_entity codebind \
 --val_loss True \
 --cfg config/cfg_asa.yaml \
 --cfg_model config/cfg_model.yaml \
@@ -25,9 +26,3 @@ python main.py \
 --loggers_dir exp/${expdir}/${expname}/log \
 --device cuda:0 cuda:1 cuda:2 2>&1 | tee ./exp/${expdir}/${expname}/${timestamp}_train.log
 
-
-# --loggers wandb \
-# --device cuda:0 cuda:1 cuda:2 cuda:3 cuda:4 cuda:5 cuda:6 cuda:7 
-
-
-# sh scripts/exp_asa.sh

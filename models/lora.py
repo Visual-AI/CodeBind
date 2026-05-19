@@ -115,12 +115,7 @@ class LoRALayer(nn.Module):
     
     
     def forward(self, x: torch.Tensor, attn_mask: Optional[torch.Tensor] = None, **kwargs):
-        
-        # for param_name, param in self.lora_module.named_parameters():
-        #     if param_name in self.param_name_to_apply_lora:
-        #         lora_name = self.lora_module_name[param_name]
-        #         param = param.detach() + eval(f'self.{lora_name}_lora_up') @ eval(f'self.{lora_name}_lora_down')
-        #         # param = torch.zeros_like(param.detach())
+    
 
         # prepare param layer to apply lora for different module
         if self.lora_module.__class__.__name__ == 'MultiheadAttention':
@@ -180,9 +175,6 @@ class LoRA_SimpleTransformer(nn.Module):
             param_name_to_apply_lora = ['in_proj_weight', 'out_proj.weight']
         elif lora_module_mode == 'attn_out':
             param_name_to_apply_lora = ['out_proj.weight']
-        # create for storage, then we can init them or load weights
-        # self.w_As = []  # These are linear layers
-        # self.w_Bs = []
 
         # lets freeze first
         for param in transformer_model.parameters():
@@ -193,13 +185,6 @@ class LoRA_SimpleTransformer(nn.Module):
             # If we only want few lora layer instead of all
             if t_layer_idx not in self.lora_layer_idxs:
                 continue
-            # w_a_linear_qkv = nn.Linear(dim, rank, bias=False)
-            # w_b_linear_qkv = nn.Linear(rank, dim, bias=False)
-            # self.w_As.append(w_a_linear_qkv)
-            # self.w_Bs.append(w_b_linear_qkv)
-            # blk.prev_attn = blk.attn
-            
-            # blk.attn = _LoRALayer(blk.prev_attn, w_a_linear_qkv, w_b_linear_qkv)
 
             blk.attn = LoRALayer(blk.attn, rank, param_name_to_apply_lora)
             if lora_module_mode == 'all':
@@ -218,11 +203,6 @@ class LoRA_SimpleTransformer(nn.Module):
 
         assert filename.endswith(".safetensors")
 
-        # num_layer = len(self.w_As)  # actually, it is half
-        # a_tensors = {f"w_a_{i:03d}": self.w_As[i].weight for i in range(num_layer)}
-        # b_tensors = {f"w_b_{i:03d}": self.w_Bs[i].weight for i in range(num_layer)}
-
-        # merged_dict = {**a_tensors, **b_tensors}
         
         merged_dict = {}
         for name, param in self.lora_model.named_parameters():
@@ -240,15 +220,6 @@ class LoRA_SimpleTransformer(nn.Module):
         assert filename.endswith(".safetensors")
 
         with safe_open(filename, framework="pt") as f:
-            # for i, w_A_linear in enumerate(self.w_As):
-            #     saved_key = f"w_a_{i:03d}"
-            #     saved_tensor = f.get_tensor(saved_key)
-            #     w_A_linear.weight = Parameter(saved_tensor)
-
-            # for i, w_B_linear in enumerate(self.w_Bs):
-            #     saved_key = f"w_b_{i:03d}"
-            #     saved_tensor = f.get_tensor(saved_key)
-            #     w_B_linear.weight = Parameter(saved_tensor)
             
             for name, param in self.lora_model.named_parameters():
                 if 'lora_down' in name or 'lora_up' in name:
@@ -256,10 +227,7 @@ class LoRA_SimpleTransformer(nn.Module):
                     param.data.copy_(saved_tensor)
 
     def reset_parameters(self) -> None:
-        # for w_A in self.w_As:
-        #     nn.init.kaiming_uniform_(w_A.weight, a=math.sqrt(5))
-        # for w_B in self.w_Bs:
-        #     nn.init.zeros_(w_B.weight)
+
 
         for name, param in self.lora_model.named_parameters():
             if 'lora_down' in name:

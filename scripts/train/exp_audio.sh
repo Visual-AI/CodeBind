@@ -15,6 +15,7 @@ python main.py \
 --batch_size 6 \
 --max_epochs 40 \
 --loggers wandb \
+--wandb_entity codebind \
 --val_loss True \
 --cfg config/cfg_audio.yaml \
 --cfg_model config/cfg_model.yaml \
@@ -24,11 +25,3 @@ python main.py \
 --save_cfg_filepath exp/${expdir}/${expname}/cfg_all_train.yaml \
 --loggers_dir exp/${expdir}/${expname}/log \
 --device cuda:0 cuda:1 cuda:2 cuda:3 cuda:4 cuda:5 cuda:6 cuda:7 2>&1 | tee ./exp/${expdir}/${expname}/${timestamp}_train.log
-
-
-# --loggers wandb \
-
-# sh scripts/exp_asa.sh
-
-# --limit_train_batches 0.001 \
-# --limit_val_batches 1 \

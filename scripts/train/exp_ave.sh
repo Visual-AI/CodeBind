@@ -16,6 +16,7 @@ python main.py \
 --max_epochs 30 \
 --val_loss True \
 --loggers wandb \
+--wandb_entity codebind \
 --cfg config/cfg_ave.yaml \
 --cfg_model config/cfg_model.yaml \
 --resume_expname .checkpoints/exp_from_zilong/exp_audio/audio_lora_MVQ1024x8_256x8 \

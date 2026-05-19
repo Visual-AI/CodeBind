@@ -43,13 +43,8 @@ class ResidualStack(nn.Module):
 class DecoderHead(nn.Module):
     def __init__(self, kernel_size, stride, patches_layout, scale, in_channels, hidden_channels, out_channels=3):
         super().__init__()
-        # kernel_size = 7
-        # stride = 7
-        # patch_num = 16  # 每一行、列的patch数量, 224/14 = 16  
-        # scale = 2       # 重建后的图像，相比于原图的尺寸缩小倍数
         self.patches_layout = patches_layout  # 1, int(img_resolution_h / scale / kernel_size), int(img_resolution_w / scale / kernel_size)
         self.scale = scale
-        # assert img_resolution == self.patch_num * kernel_size * scale
         
         if isinstance(kernel_size, tuple):
             self.deconv = nn.ConvTranspose3d(
@@ -87,17 +82,6 @@ class DecoderHead(nn.Module):
 
         x = self.deconv(x)
 
-        # if x.shape != output_shape:
-        #     output_shape = list(output_shape)
-        #     output_shape = [size if i not in (len(output_shape)-1, len(output_shape)-2) else int(size / self.scale) for i,size in enumerate(output_shape)]
-        #     x = x.reshape(output_shape)
-        # x = F.relu(x)
-        
-        # hidden layers
-        # x = self.hid_conv(x)
-
-        # x = self.out_conv(x)
-        # x = F.relu(x)  # ! should never use a relu here.
         # align original data shape with decoder head input data shape since audio and video inputs consist of multiple clips
         if ori_data.ndim >= 5:
             B, S = ori_data.shape[:2]

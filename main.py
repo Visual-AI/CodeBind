@@ -36,7 +36,6 @@ from models import lora as LoRA
 from models.codebind_model import ModalityType, load_module, save_module
 from application.emergent_zero_shot_classification import EmergentZeroShotClassifier, map_calculation
 from application.cross_modality_retrieval import CrossModalityRetrieval
-from application.load_sd import imagebind_huge_sd
 
 from config import load_cfg
 from datasets import get_dataset
@@ -56,7 +55,7 @@ from icecream import ic
 # Logging settings
 LOG_ON_STEP = True
 LOG_ON_EPOCH = True
-SAVE_CKP_LORA = True  # True 则手动保存， False 则使用lightning callback 自动保存checkpoint
+SAVE_CKP_LORA = True 
 
 MODALITIES = ["vision", "text", "audio", "thermal", "depth", "imu", "tactile", "eeg"]
 from datasets.data_transform_rgbd import inv_normalize
@@ -115,14 +114,9 @@ class CodeBind(L.LightningModule):
 
     def init_network(self):
         # --- Load full pretrained ImageBind model
-        if self.args.get("sd_version", False):
-            self.model, self.model_postprocessors = imagebind_huge_sd(pretrained=True, train_mode=self.train_mode, 
-                                                                      modality_train=self.modality_train, cfg_encoder=self.cfg_encoder, 
-                                                                      cfg_eeg=self.args.get('eeg_conf'))
-        else:
-            self.model, self.model_postprocessors = codebind_model.imagebind_huge(pretrained=True, train_mode=self.train_mode, 
-                                                                                modality_train=self.modality_train, cfg_encoder=self.cfg_encoder, 
-                                                                                cfg_eeg=self.args.get('eeg_conf'))
+        self.model, self.model_postprocessors = codebind_model.imagebind_huge(pretrained=True, train_mode=self.train_mode, 
+                                                                            modality_train=self.modality_train, cfg_encoder=self.cfg_encoder, 
+                                                                            cfg_eeg=self.args.get('eeg_conf'))
         logging.info(f"Enable {self.train_mode} for {self.modality_train}.")
         if self.train_mode == "lora":
             lora_layer_idxs = {}
@@ -215,12 +209,6 @@ class CodeBind(L.LightningModule):
             T_max=self.args.max_epochs, 
             eta_min=self.args.lr / 50
             )
-        
-        # load optimizer
-        # try:
-        #     optimizer.load_state_dict(torch.load(os.path.join(self.checkpoint_dir, f"imagebind-optimizer{self.checkpoint_postfix}.pth"), map_location='cpu'))
-        # except FileNotFoundError:
-        #     logging.warning(f"Could not load parameters for optimizer from {self.checkpoint_dir}.")
 
         return [optimizer], [lr_scheduler]
     
@@ -278,7 +266,6 @@ class CodeBind(L.LightningModule):
 
     def calculate_loss(self, out_dict, batch, batch_idx, mode):
         total_loss = 0
-        # mode_vq = 'train' if mode == 'train' or self.args.get('val_loss', False) else 'val'
         if mode == 'train' or self.args.get('val_loss', False):
             mode_vq = 'train'
             if 'text' in self.modality_pair:
@@ -318,28 +305,6 @@ class CodeBind(L.LightningModule):
                         feats_anchor.update({modality_name: vq_dict_unimodal.get('common')})
                     else:
                         feats_b[modality_name] = vq_dict_unimodal.get('common')
-            # if self.cfg_encoder.get('add_new_output_head'):
-            ### same as above ###
-            # else:
-            #     if self.use_decoder and self.cfg_vq.get('vq_all_token'):  # single vq with cls_token and patch_tokens
-            #         for modality_name in vq_modality_list:
-            #             vq_dict_unimodal = self.modality_vq(out_dict.get(modality_name+'_all_tokens'))
-            #             vq_dict.update({modality_name: vq_dict_unimodal})
-            #             out_dict.update({modality_name+'_vq': vq_dict_unimodal.get('q')})
-            #             if modality_name in self.modality_anchor:
-            #                 feats_a = vq_dict_unimodal.get('q')[:, 0, ...] if modality_name != 'text' else vq_dict_unimodal.get('q')
-            #                 feats_anchor.update({modality_name: feats_a})
-            #             else:
-            #                 feats_b[modality_name] = vq_dict_unimodal.get('q')[:, 0, ...] if modality_name != 'text' else vq_dict_unimodal.get('q')
-
-            #     else:  # single vq with only cls_token
-            #         for modality_name in vq_modality_list:
-            #             vq_dict_unimodal = self.modality_vq(out_dict.get(modality_name))
-            #             vq_dict.update({modality_name: vq_dict_unimodal})
-            #             if modality_name in self.modality_anchor:
-            #                 feats_anchor.update({modality_name: vq_dict_unimodal.get('q')})
-            #             else:
-            #                 feats_b[modality_name] = vq_dict_unimodal.get('q')
 
             loss_vq = self.vq_loss(vq_dict, mode=mode)
             total_loss += loss_vq
@@ -493,12 +458,8 @@ class CodeBind(L.LightningModule):
                 if not self.cfg_vq.get('norm_code', False):
                     common_unimodal = F.normalize(common_unimodal, dim=-1)
                     specific_unimodal = F.normalize(specific_unimodal, dim=-1)
-                # vq_specific.append(specific_unimodal)
                 loss_modal_decomp += torch.norm(torch.einsum('bnd, bmd->bnm', common_unimodal, specific_unimodal), dim=(1,2), p='fro').mean()
                 cnt += 1
-        # if len(vq_specific) == 2:
-        #     loss_modal_decomp += torch.norm(torch.einsum('bnd, bmd->bnm', vq_specific[0], vq_specific[1]), dim=(1,2), p='fro').mean()
-        #     cnt += 1
         loss_modal_decomp /= cnt
 
         return loss_modal_decomp
@@ -570,16 +531,12 @@ class CodeBind(L.LightningModule):
             # encoder_trunk_input = encoder_output.get(class_encoder+"_trunk_input")
             encoder_trunk_output = encoder_output.get(class_decoder+"_trunk_output")
             encoder_pos_embed = encoder_output.get(class_decoder+"_pos_embed")
-            # 若有经过VQ的数据，则优先使用；没有则用encoder最终的输出
             if encoder_output.get(class_decoder+"_vq") is not None:
                 encoder_embedding = encoder_output.get(class_decoder+"_vq")
-                # if not self.cfg_vq.get('norm_code', False):
-                #     encoder_embedding = F.normalize(encoder_embedding, dim=-1)
             else:
                 encoder_embedding = encoder_output.get(class_decoder+"_all_tokens")
 
             decoder_input = encoder_embedding if self.cfg_decoder.get('with_cls_token') else encoder_embedding[:, 1:, ...]
-            # encoder_pos_embed = None  # encoder trunk 和 decoder trunk 的 input_dim 不同
 
             rec_token = self.decoder_trunks[class_decoder](
                 decoder_input,
@@ -601,13 +558,6 @@ class CodeBind(L.LightningModule):
                 
                 loss_piexl_recons += loss_piexl_recons_x
                 
-                # -- feature-level reconstruction loss
-                # loss_feature_recons_x = F.mse_loss(rec_token_x, ori_token_x)  
-                # self.log(mode + "_loss_feature_recons_"+class_x, loss_feature_recons_x, prog_bar=True,
-                #          on_step=LOG_ON_STEP, on_epoch=LOG_ON_EPOCH, batch_size=self.args.batch_size,
-                #          sync_dist=True,  # sync logging across all GPU workers,
-                #          #  It is recommended to use 'sync_dist=True' when logging on epoch level in distributed setting to accumulate the metric across devices.
-                #          )
 
             # visualize reconstruction results for some data in the first batch in both train and validation mode
             if batch_idx == 0:  # if mode == "val" and batch_idx == 0:
@@ -625,31 +575,13 @@ class CodeBind(L.LightningModule):
                 os.makedirs(_save_img_dir, exist_ok=True)
                 log_img_path = os.path.join(_save_img_dir, f'ori_rec_{class_decoder}_epoch{self.current_epoch}.jpg')
                 save_image(255 * input_grid.cpu().numpy(), image_path=log_img_path)
-                # log image to wandb
-                # if mode == "val" and self.args.get("loggers", False):
-                #     images = wandb.Image(img_pair, caption="Top: Input, Bottom: Output")
-                #     _key = f"reconstruction - {class_decoder}"
-                #     wandb.log({_key: images})
 
-        return loss_piexl_recons # loss_feature_recons_x + 
+        return loss_piexl_recons
     
     def on_train_epoch_start(self) -> None:
-        # self.batch_size = self.trainer.train_dataloader.batch_size
-        # current_lr = [param_group['lr'] for param_group in self.optimizers().optimizer.param_groups]
-        # self.log("lr_new", current_lr[-1], prog_bar=True,
-        #                 on_step=False, on_epoch=LOG_ON_EPOCH, batch_size=self.args.batch_size,
-        #                 sync_dist=True,
-        #                 )
-        # self.log("lr", current_lr[0], prog_bar=True,
-        #         on_step=False, on_epoch=LOG_ON_EPOCH, batch_size=self.args.batch_size,
-        #         sync_dist=True, 
-        #         )
         return super().on_train_epoch_start()
 
     def training_step(self, batch, batch_idx):
-        # mode = "train"
-        # total_loss = 0
-
         output_intermediate = True # if self.use_decoder else False
         res_dict = self.forward(batch, output_intermediate)
         total_loss = self.calculate_loss(res_dict, batch, batch_idx, mode="train")
@@ -657,8 +589,6 @@ class CodeBind(L.LightningModule):
         return total_loss
         
     def on_train_epoch_end(self):
-        # TODO [1] only run on rank 0, [2] move to a more sutible place. ----
-        # self.save_checkpoint(postfix="_last")
         pass
 
 
@@ -692,19 +622,17 @@ class CodeBind(L.LightningModule):
 
         if self.args.get('val_loss', False) or (self.use_decoder and batch_idx==0):
             # pdb.set_trace()
-            output_intermediate = True # if self.use_decoder else False
+            output_intermediate = True 
             res_dict = self.forward(batch, output_intermediate)
             total_loss = self.calculate_loss(res_dict, batch, batch_idx, mode="val")
 
     def on_validation_epoch_start(self) -> None:
         self.set_validation_metric()
-        # self.batch_size = self.trainer.val_dataloaders.batch_size
         if self.validation_metric == 'recall':
             if self.flag_update_retrieval_model or self.retrieval is None:
                 print(f"Prepare Cross Madality Retrieval for {self.modality_eval} ...")
                 self.retrieval = CrossModalityRetrieval(classifier_model=self, retrieval_modality_type=self.modality_eval)
         else:
-            # 如果训练集中包含 TEXT，则 classifer 需要更新，否则不用更新
             if self.use_vq or self.flag_update_text_model or self.ezs_classfier is None:
                 print(f"Prepare Emergent ZeroShot Classifier for {self.modality_eval} ... ")
                 self.ezs_classfier = EmergentZeroShotClassifier(classifier_model=self, modality_type=self.modality_eval, text_template=self.args.get('text_template'))
@@ -852,55 +780,29 @@ class CodeBind(L.LightningModule):
             save_module(self.decoder_heads, modality_name=self.modality_reconstruction, 
                         module_name="decoder_head", checkpoint_dir=self.checkpoint_dir, postfix=postfix)
         
-        # save optimizer
-        # try:
-        #     torch.save(self.optimizers().optimizer.state_dict(), 
-        #             os.path.join(self.checkpoint_dir, f"imagebind-optimizer{postfix}.pth"))
-        #     logging.info(f"Saved parameters optimizer to {self.checkpoint_dir}.")
-        # except FileNotFoundError:
-        #     logging.warning(f"Could not save parameters for optimizer to {self.checkpoint_dir}.")
-        
 
 def set_logger(args):
     # Create logger
-    # for logger in args.loggers if args.loggers is not None else []:
     logger = args.get("loggers", None)
-    # pdb.set_trace()
     if logger == "wandb":
+        if wandb is None:
+            raise ImportError("wandb is not installed. Install it or choose another logger.")
+
         save_dir = args.get('loggers_dir', f"./exp/{args.get('expname')}/log")
         os.makedirs(save_dir, exist_ok=True)
-        wandb.init(
-            project="imagebind",
-            entity="image_bind", 
-            name=args.get('expname'),  # display name for this run
-            dir=save_dir,
-            config=dict(args))
+
+        wandb_project = args.get("wandb_project", "codebind")
+        wandb_entity = args.get("wandb_entity", "codebind")
+
         wandb_logger = pl_loggers.WandbLogger(
             save_dir=save_dir,
-            name="imagebind")
+            project=wandb_project,
+            entity=wandb_entity,
+            name=args.get('expname'))
+        wandb_logger.experiment.config.update(dict(args), allow_val_change=True)
         logger = wandb_logger
-    elif logger == "tensorboard":
-        tensorboard_logger = pl_loggers.TensorBoardLogger(
-            save_dir=args.loggers_dir,
-            name="imagebind")
-        logger = tensorboard_logger
-    elif logger == "comet":
-        comet_logger = pl_loggers.CometLogger(
-            save_dir=args.loggers_dir,
-            api_key=os.environ["COMET_API_KEY"],
-            workspace=os.environ["COMET_WORKSPACE"],
-            project_name=os.environ["COMET_PROJECT_NAME"],
-            experiment_name=os.environ.get("COMET_EXPERIMENT_NAME", None),
-        )
-        logger = comet_logger
-    elif logger == "mlflow":
-        mlflow_logger = pl_loggers.MLFlowLogger(
-            save_dir=args.loggers_dir,
-            experiment_name=os.environ["MLFLOW_EXPERIMENT_NAME"],
-            tracking_uri=os.environ["MLFLOW_TRACKING_URI"],
-            run_name="imagebind"
-        )
-        logger = mlflow_logger
+    else:
+        raise NotImplementedError(f"Logger {logger} is not supported. Please choose from ['wandb'].")
     
     print("Create logger:", args.get("loggers", None))
     return logger
@@ -909,28 +811,6 @@ def set_logger(args):
 def main(args):
     # Set experiment properties
     seed_everything(args.seed, workers=True)
-    # torch.backends.cudnn.determinstic = True
-
-    # train_dataset, test_dataset = get_dataset(args)
-
-    # if train_dataset is not None:
-    #     train_loader = DataLoader(
-    #         train_dataset,
-    #         batch_size=args.batch_size,
-    #         shuffle=True,
-    #         drop_last=True,
-    #         pin_memory=False,
-    #         num_workers=args.num_workers,
-    #     )
-    # if test_dataset is not None:
-    #     val_loader = DataLoader(
-    #         test_dataset,
-    #         batch_size=args.batch_size,
-    #         shuffle=False,
-    #         drop_last=False,
-    #         pin_memory=False,
-    #         num_workers=args.num_workers,
-    #     )
 
     model = CodeBind(args=args)
     # load existing checkpoint
@@ -940,9 +820,6 @@ def main(args):
             model = CodeBind.load_from_checkpoint(save_checkpoint_dir)
             
         
-    
-    # =======================
-    # train(args, model)
     if args.get('train', False):
         logging.info("# # # # # ==> Running training progress ...")        
         train(args, model)
@@ -952,7 +829,7 @@ def main(args):
         
 
 def train(args, model):
-    device_name = args.device  # "cuda:0" if torch.cuda.is_available() else "cpu"
+    device_name = args.device
     if "cpu" == device_name[0]:
         devices = 1
         accelerator = "cpu"
@@ -995,56 +872,20 @@ def train(args, model):
                       enable_checkpointing=False if SAVE_CKP_LORA else True,
                       num_sanity_val_steps=0,
                       callbacks=[checkpoint_callback] if not SAVE_CKP_LORA else None
-                    #   **checkpointing
                       )
     
 
-    # TODO Resume : continue training from checkpoint
-    # 需要记录 optimizer, epoch, learning rate
-    # automatically restores model, epoch, step, LR schedulers, etc...
-    # ckpt_path = None  # "some/path/to/my_checkpoint.ckpt",  
-    # if args.full_model_checkpoint_dir
-    # model = MyLightingModule.load_from_checkpoint(PATH)
-    # 覆盖ckpt文件中的超参数，in_dim=128, out_dim=10
-    # model = LitModel.load_from_checkpoint(PATH, in_dim=128, out_dim=10)
     if args.get('train', False):
         logging.info("# # # # # ==> Running training progress ...")     
-        # logging.info("Start fit")
-        trainer.fit(model,
-                    # ckpt_path=ckpt_path,
-                    )
+        trainer.fit(model)
         if not SAVE_CKP_LORA:
             root_dir = args.get('lightning_log', f"./exp/{args.get('expname')}/lightning_log")
             trainer.save_checkpoint(os.path.join(root_dir, "example_last.ckpt"))
 
     else:
         logging.info("# # # # # ==> Running testing progress ...")
-        # eval(model, val_loader)
         trainer.validate(model)
 
-
-# @rank_zero_only
-# def eval(model, val_loader):
-#     # --------------- eval ---------------------
-#     # 
-#     if model.validation_metric == 'recall':
-#         logging.info('Start evaluate Cross Modality Retrieval')
-#         device = model.retrieval.device
-#         model.to(device)    
-#         model.freeze()     
-#         retrieval = model.retrieval
-#         retrieval.get_retrieval_recall(val_loader)
-#     else:
-#         logging.info('Start evaluate Emergent Zero-Shot Classifion')
-#         device = model.ezs_classfier.device
-#         model.to(device)    
-#         model.freeze()                          
-#         ezs_classfier = model.ezs_classfier
-
-#         if model.validation_metric == 'acc':
-#             ezs_classfier.get_classification_acc(val_loader)
-#         else:
-#             ezs_classfier.get_classification_map(val_loader)
 
 
 def test(args, model):
@@ -1076,12 +917,6 @@ def test(args, model):
                                                    modality_type=args.modality_eval,
                                                    text_template=args.get('text_template'))
         
-        # if args.get("intramodal_classifier", False):
-        #     # ezs_classfier.set_classifier(train_loader, intramodal_vector='common_and_specific')
-        #     # ezs_classfier.set_classifier(val_loader, intramodal_vector='common')
-        #     ezs_classfier.set_classifier(model.val_loader, intramodal_vector='specific')
-        #     # ezs_classfier.set_classifier(val_loader, intramodal_vector='common_and_specific')
-
         if model.validation_metric == 'acc':
             ezs_classfier.get_classification_acc(model.val_loader)
         else:

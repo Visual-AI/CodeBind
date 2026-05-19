@@ -14,6 +14,8 @@ python main.py \
 --scale_factor 1 \
 --batch_size 6 \
 --max_epochs 40 \
+--loggers wandb \
+--wandb_entity codebind \
 --val_loss True \
 --cfg config/cfg_audiocaps.yaml \
 --cfg_model config/cfg_model.yaml \
@@ -26,7 +28,7 @@ python main.py \
 
 
 # --device cuda:0 cuda:1 cuda:2 cuda:3 cuda:4 cuda:5 cuda:6 cuda:7 2>&1 | tee ./exp/${expdir}/${expname}/${timestamp}_train.log
-# --loggers wandb \
+
 # --limit_train_batches 0.001 \
 # --limit_val_batches 0.01 \
 # --input_projection True \  # 将thunk feature 加入到decoder

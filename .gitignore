@@ -25,14 +25,5 @@ wandb
 exp
 
 
-# submodules
-submodules/GroundingDINO
-
-application
-# application/stable_unclip/
-# application/stable_unclip_new/
-# application/intra_retrieval/
-# application/embed_detection/
-
 .cache
 tmp
