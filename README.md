@@ -108,7 +108,7 @@ If you find this repository useful, please consider giving a star ⭐ and citati
     title={CodeBind: Decoupled Representation Learning for Multimodal Alignment
     with Unified Compositional Codebook},
     author={Zeyu Chen and Jie Li and Kai, Han},
-    journal={arXiv preprint arXiv:},
+    journal={arXiv preprint arXiv:2605.18257},
     year={2026}
 }
 ```
